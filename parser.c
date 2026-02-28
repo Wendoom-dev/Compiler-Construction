@@ -434,7 +434,7 @@ TreeNode* parse(ParseTable* pt,
             }
             else{
                 printf("Missing terminal at line %d\n",
-                       tokens[ip]->lineNum);
+                       (ip < tokenCount ? tokens[ip]->lineNum : -1));
                 errorCount++;
                 top--;
             }
@@ -477,14 +477,14 @@ TreeNode* parse(ParseTable* pt,
             else if(cell.state==SYNCH){
 
                 printf("Sync recovery at line %d\n",
-                       tokens[ip]->lineNum);
+                       (ip < tokenCount ? tokens[ip]->lineNum : -1));
                 errorCount++;
                 continue;
             }
             else{ /* BLANK */
 
                 printf("Discarding token at line %d\n",
-                       tokens[ip]->lineNum);
+                       (ip < tokenCount ? tokens[ip]->lineNum : -1));
                 errorCount++;
                 ip++;
             }
