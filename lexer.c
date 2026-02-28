@@ -221,7 +221,7 @@ token* getNextToken(buffer* twinBuffer) {
             case 0: //Start state
 
                 if (c == '\0' || c == EOF) {
-                    return NULL;
+                    return createToken(TK_DOLLAR, "$", currLineNum);
                 }
 
                 else if(c == ' ' || c == '\t' || c == '\n') {
