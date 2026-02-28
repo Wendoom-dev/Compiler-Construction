@@ -99,7 +99,7 @@ typedef struct {
 } TableCell;
 
 typedef struct {
-    TableCell table[NONTERMINAL_COUNT][64];
+    TableCell table[NONTERMINAL_COUNT][TOTAL_TERMINALS_COUNT];
 } ParseTable;
 
 
