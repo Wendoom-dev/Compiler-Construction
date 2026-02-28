@@ -3,7 +3,7 @@
 #include "lexer.h"
 #include "lexerDef.h"
 
-#define grammar "grammarfile.txt"
+#define grammar "grammar.txt"
 
 typedef enum {
     NT_program,
