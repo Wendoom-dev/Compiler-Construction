@@ -9,6 +9,11 @@ void addSymbol(Production* p,int sym);
 void initGrammar(Grammar* g);
 void addProductionToGrammar(Grammar* g,int nt,Production p);
 
+void loadGrammarFromFile(Grammar* g, const char* filename);
+void computeFirst(Grammar* g);
+void computeFollow(Grammar* g, int startNT);
+void buildParseTable(ParseTable* pt, Grammar* g);
+
 void setAdd(Set* s,int t);
 bool setContains(Set s,int t);
 
