@@ -1,27 +1,120 @@
 #include "parser.h"
 
+const char* TerminalNames[] = {
+    "TK_ASSIGNOP", "TK_COMMENT", "TK_FIELDID", "TK_ID", "TK_NUM", "TK_RNUM",
+    "TK_FUNID", "TK_RUID", "TK_WITH", "TK_END", "TK_WHILE", "TK_UNION",
+    "TK_ENDUNION", "TK_DEFINETYPE", "TK_AS", "TK_TYPE", "TK_MAIN",
+    "TK_GLOBAL", "TK_PARAMETER", "TK_PARAMETERS", "TK_LIST", "TK_SQL", "TK_SQR",
+    "TK_INPUT", "TK_OUTPUT", "TK_INT", "TK_REAL", "TK_COMMA",
+    "TK_SEM", "TK_COLON", "TK_DOT", "TK_ENDWHILE", "TK_OP",
+    "TK_CL", "TK_IF", "TK_THEN", "TK_ENDIF", "TK_READ",
+    "TK_WRITE", "TK_RETURN", "TK_PLUS", "TK_MINUS", "TK_MUL",
+    "TK_DIV", "TK_CALL", "TK_RECORD", "TK_ENDRECORD",
+    "TK_ELSE", "TK_AND", "TK_OR", "TK_NOT", "TK_LT",
+    "TK_LE", "TK_EQ", "TK_GT", "TK_GE", "TK_NE",
+    "TK_DOLLAR", "TK_ERROR"
+};
+
+const char* NonTerminalNames[] = {
+    "program", "mainFunction", "otherFunctions", "function", "input_par",
+    "output_par", "parameter_list", "remaining_list", "dataType",
+    "primitiveDatatype", "constructedDatatype", "stmts", "typeDefinitions",
+    "actualOrRedefined", "typeDefinition", "fieldDefinitions", "fieldDefinition",
+    "fieldType", "moreFields", "declarations", "declaration", "global_or_not",
+    "otherStmts", "stmt", "assignmentStmt", "singleOrRecId",
+    "option_single_constructed", "oneExpansion", "moreExpansions", "funCallStmt",
+    "outputParameters", "inputParameters", "iterativeStmt", "conditionalStmt",
+    "elsePart", "ioStmt", "arithmeticExpression", "expPrime", "term",
+    "termPrime", "factor", "highPrecedenceOperators", "lowPrecedenceOperators",
+    "booleanExpression", "var", "logicalOp", "relationalOp", "returnStmt",
+    "optionalReturn", "idList", "more_ids", "definetypestmt", "A"
+};
+
+int strToEnum(const char* sym) {
+    if (strcmp(sym, "TK_ASSIGNOP") == 0) return TK_ASSIGNOP;
+    if (strcmp(sym, "TK_COMMENT") == 0) return TK_COMMENT;
+    if (strcmp(sym, "TK_FIELDID") == 0) return TK_FIELDID;
+    if (strcmp(sym, "TK_ID") == 0) return TK_ID;
+    if (strcmp(sym, "TK_NUM") == 0) return TK_NUM;
+    if (strcmp(sym, "TK_RNUM") == 0) return TK_RNUM;
+    if (strcmp(sym, "TK_FUNID") == 0) return TK_FUNID;
+    if (strcmp(sym, "TK_RUID") == 0) return TK_RUID;
+    if (strcmp(sym, "TK_WITH") == 0) return TK_WITH;
+    if (strcmp(sym, "TK_END") == 0) return TK_END;
+    if (strcmp(sym, "TK_WHILE") == 0) return TK_WHILE;
+    if (strcmp(sym, "TK_UNION") == 0) return TK_UNION;
+    if (strcmp(sym, "TK_ENDUNION") == 0) return TK_ENDUNION;
+    if (strcmp(sym, "TK_DEFINETYPE") == 0) return TK_DEFINETYPE;
+    if (strcmp(sym, "TK_AS") == 0) return TK_AS;
+    if (strcmp(sym, "TK_TYPE") == 0) return TK_TYPE;
+    if (strcmp(sym, "TK_MAIN") == 0) return TK_MAIN;
+    if (strcmp(sym, "TK_GLOBAL") == 0) return TK_GLOBAL;
+    if (strcmp(sym, "TK_PARAMETER") == 0) return TK_PARAMETER;
+    if (strcmp(sym, "TK_PARAMETERS") == 0) return TK_PARAMETERS;
+    if (strcmp(sym, "TK_LIST") == 0) return TK_LIST;
+    if (strcmp(sym, "TK_SQL") == 0) return TK_SQL;
+    if (strcmp(sym, "TK_SQR") == 0) return TK_SQR;
+    if (strcmp(sym, "TK_INPUT") == 0) return TK_INPUT;
+    if (strcmp(sym, "TK_OUTPUT") == 0) return TK_OUTPUT;
+    if (strcmp(sym, "TK_INT") == 0) return TK_INT;
+    if (strcmp(sym, "TK_REAL") == 0) return TK_REAL;
+    if (strcmp(sym, "TK_COMMA") == 0) return TK_COMMA;
+    if (strcmp(sym, "TK_SEM") == 0) return TK_SEM;
+    if (strcmp(sym, "TK_COLON") == 0) return TK_COLON;
+    if (strcmp(sym, "TK_DOT") == 0) return TK_DOT;
+    if (strcmp(sym, "TK_ENDWHILE") == 0) return TK_ENDWHILE;
+    if (strcmp(sym, "TK_OP") == 0) return TK_OP;
+    if (strcmp(sym, "TK_CL") == 0) return TK_CL;
+    if (strcmp(sym, "TK_IF") == 0) return TK_IF;
+    if (strcmp(sym, "TK_THEN") == 0) return TK_THEN;
+    if (strcmp(sym, "TK_ENDIF") == 0) return TK_ENDIF;
+    if (strcmp(sym, "TK_READ") == 0) return TK_READ;
+    if (strcmp(sym, "TK_WRITE") == 0) return TK_WRITE;
+    if (strcmp(sym, "TK_RETURN") == 0) return TK_RETURN;
+    if (strcmp(sym, "TK_PLUS") == 0) return TK_PLUS;
+    if (strcmp(sym, "TK_MINUS") == 0) return TK_MINUS;
+    if (strcmp(sym, "TK_MUL") == 0) return TK_MUL;
+    if (strcmp(sym, "TK_DIV") == 0) return TK_DIV;
+    if (strcmp(sym, "TK_CALL") == 0) return TK_CALL;
+    if (strcmp(sym, "TK_RECORD") == 0) return TK_RECORD;
+    if (strcmp(sym, "TK_ENDRECORD") == 0) return TK_ENDRECORD;
+    if (strcmp(sym, "TK_ELSE") == 0) return TK_ELSE;
+    if (strcmp(sym, "TK_AND") == 0) return TK_AND;
+    if (strcmp(sym, "TK_OR") == 0) return TK_OR;
+    if (strcmp(sym, "TK_NOT") == 0) return TK_NOT;
+    if (strcmp(sym, "TK_LT") == 0) return TK_LT;
+    if (strcmp(sym, "TK_LE") == 0) return TK_LE;
+    if (strcmp(sym, "TK_EQ") == 0) return TK_EQ;
+    if (strcmp(sym, "TK_GT") == 0) return TK_GT;
+    if (strcmp(sym, "TK_GE") == 0) return TK_GE;
+    if (strcmp(sym, "TK_NE") == 0) return TK_NE;
+    if (strcmp(sym, "TK_DOLLAR") == 0) return TK_DOLLAR;
+
+    // Critical: Returns -1 if it's not a terminal, allowing getNonTerminalID to take over.
+    return -1; 
+}
 
 static Set FIRST[NONTERMINAL_COUNT];
 static Set FOLLOW[NONTERMINAL_COUNT];
 static bool FIRST_HAS_EPS[NONTERMINAL_COUNT];
 
 
-static void setAdd(Set* s, int t){
+void setAdd(Set* s, int t){
     *s |= (1ULL << t);
 }
 
-static bool setContains(Set s, int t){
+bool setContains(Set s, int t){
     return (s & (1ULL << t)) != 0;
 }
 
 
-static void initProduction(Production* p){
+void initProduction(Production* p){
     p->len = 0;
     p->cap = 4;
     p->rhs = malloc(sizeof(int)*p->cap);
 }
 
-static void addSymbol(Production* p, int sym){
+void addSymbol(Production* p, int sym){
     if(p->len == p->cap){
         p->cap *= 2;
         p->rhs = realloc(p->rhs,sizeof(int)*p->cap);
@@ -39,7 +132,7 @@ void initGrammar(Grammar* g){
     }
 }
 
-static void addProductionToGrammar(Grammar* g,int nt,Production p){
+void addProductionToGrammar(Grammar* g,int nt,Production p){
     RuleSet* rs = &g->rules[nt];
     if(rs->count == rs->cap){
         rs->cap *= 2;
@@ -112,7 +205,6 @@ static int getNonTerminalID(char* str){
 
 
 void loadGrammarFromFile(Grammar* g, const char* filename){
-
     FILE* fp = fopen(filename,"r");
     if(!fp){
         printf("Cannot open grammar file\n");
@@ -120,24 +212,35 @@ void loadGrammarFromFile(Grammar* g, const char* filename){
     }
 
     char line[512];
+    int lineNum = 0;
 
     while(fgets(line,sizeof(line),fp)){
-
-        if(strlen(line)<=1) continue;
+        lineNum++;
+        
+        // CRITICAL FIX: Strip all newlines and carriage returns immediately
+        line[strcspn(line, "\r\n")] = 0;
+        
+        if(strlen(line) == 0) continue;
 
         char* lhs = strtok(line," ");
+        if (!lhs) continue;
+
         strtok(NULL," "); // skip ->
 
         int nt = getNonTerminalID(lhs);
+        if(nt == -1) {
+            printf("CRITICAL ERROR: Unknown LHS '%s' on line %d of grammar.txt\n", lhs, lineNum);
+            exit(1);
+        }
 
         Production p;
         initProduction(&p);
 
         char* sym;
+        // Notice we only delimit by space now, because \r and \n are gone
+        while((sym=strtok(NULL," "))!=NULL){ 
 
-        while((sym=strtok(NULL," \n"))!=NULL){
-
-            if(strcmp(sym,"eps")==0){
+            if(strcmp(sym,"eps")==0 || strcmp(sym,"E")==0){
                 p.len = 0;
                 break;
             }
@@ -148,13 +251,15 @@ void loadGrammarFromFile(Grammar* g, const char* filename){
             }
             else{
                 int nt2 = getNonTerminalID(sym);
+                if(nt2 == -1) {
+                    printf("CRITICAL ERROR: Unknown RHS symbol '%s' on line %d of grammar.txt\n", sym, lineNum);
+                    exit(1);
+                }
                 addSymbol(&p,-nt2-1);
             }
         }
-
         addProductionToGrammar(g,nt,p);
     }
-
     fclose(fp);
 }
 
@@ -308,7 +413,7 @@ void initParseTable(ParseTable* pt){
             pt->table[i][j].state=BLANK;
 }
 
-static void setRule(ParseTable* pt,int nt,int t,int ruleIndex){
+void setRule(ParseTable* pt,int nt,int t,int ruleIndex){
     if(pt->table[nt][t].state == RULE){
         printf("LL(1) Conflict at [%d,%d]\n",nt,t);
     }
@@ -370,7 +475,7 @@ void buildParseTable(ParseTable* pt,Grammar* g){
 
 
 
-static TreeNode* createNode(int symbol){
+TreeNode* createNode(int symbol){
     TreeNode* n = malloc(sizeof(TreeNode));
     n->symbol = symbol;
     n->tk = NULL;
@@ -380,7 +485,7 @@ static TreeNode* createNode(int symbol){
     return n;
 }
 
-static void addChild(TreeNode* parent, TreeNode* child){
+void addChild(TreeNode* parent, TreeNode* child){
     if(parent->childCount == parent->cap){
         parent->cap *= 2;
         parent->children =
@@ -410,83 +515,89 @@ TreeNode* parse(ParseTable* pt,
     TreeNode* root = createNode(startSymbol);
 
     stack[++top] = (StackEntry){TK_DOLLAR,NULL};
-    stack[++top] = (StackEntry){startSymbol,root};
+    stack[++top] = (StackEntry){-startSymbol - 1, root};
 
     int ip=0;
-
+    bool errorRecovery = false;
     while(top>=0){
 
         StackEntry curr = stack[top];
-        int currTok =
-            (ip<tokenCount)?
-            tokens[ip]->tokenName:
-            TK_DOLLAR;
+        
+        // Grab values safely to prevent segmentation faults
+        int currTok = (ip < tokenCount) ? tokens[ip]->tokenName : TK_DOLLAR;
+        int lineNum = (ip < tokenCount) ? tokens[ip]->lineNum : -1;
+        char* lexStr = (ip < tokenCount) ? tokens[ip]->lexeme : "$";
 
-        if(curr.symbol>=0){
+        if(curr.symbol >= 0){
 
-            if(curr.symbol==currTok){
-
-                if(curr.node)
-                    curr.node->tk = tokens[ip];
-
+            if(curr.symbol == currTok){
+                if(curr.node) curr.node->tk = tokens[ip];
                 top--;
                 ip++;
+                errorRecovery = false;
             }
-            else{
-                printf("Missing terminal at line %d\n",
-                       (ip < tokenCount ? tokens[ip]->lineNum : -1));
+            else {
+                // TERMINAL MISMATCH
+                printf("Line %d Error: The token %s for lexeme %s does not match with the expected token %s\n",
+                       lineNum, TerminalNames[currTok], lexStr, TerminalNames[curr.symbol]);
                 errorCount++;
-                top--;
+                top--; // Pop the expected terminal to attempt recovery
+                errorRecovery=true;
             }
         }
-        else{
+        else {
 
             top--;
+            int nt = -curr.symbol - 1;
+            TableCell cell = pt->table[nt][currTok];
 
-            int nt = -curr.symbol-1;
-            TableCell cell =
-                pt->table[nt][currTok];
+            if(cell.state == RULE){
+                // Normal derivation
+                Production* p = &g->rules[nt].prods[cell.ruleIndex];
 
-            if(cell.state==RULE){
-
-                Production* p =
-                    &g->rules[nt].prods[cell.ruleIndex];
-
-                if(p->len==0){
-                    TreeNode* epsNode =
-                        createNode(EPSILON);
-                    addChild(curr.node,epsNode);
+                if(p->len == 0){
+                    TreeNode* epsNode = createNode(EPSILON);
+                    addChild(curr.node, epsNode);
                     continue;
                 }
 
                 TreeNode* children[p->len];
-
-                for(int i=0;i<p->len;i++){
-                    children[i]=
-                        createNode(p->rhs[i]);
-                    addChild(curr.node,
-                             children[i]);
+                for(int i=0; i<p->len; i++){
+                    children[i] = createNode(p->rhs[i]);
+                    addChild(curr.node, children[i]);
                 }
-
-                for(int i=p->len-1;i>=0;i--)
-                    stack[++top] =
-                        (StackEntry){
-                            p->rhs[i],
-                            children[i]};
+                for(int i=p->len-1; i>=0; i--)
+                    stack[++top] = (StackEntry){p->rhs[i], children[i]};
             }
-            else if(cell.state==SYNCH){
-
-                printf("Sync recovery at line %d\n",
-                       (ip < tokenCount ? tokens[ip]->lineNum : -1));
+            else if(cell.state == SYNCH){
+                // SYNCH RECOVERY
+                if (!errorRecovery) { // Only print if not muted
+                    printf("Line %d Error: Invalid token %s encountered with value %s stack top %s\n",
+                           lineNum, TerminalNames[currTok], lexStr, NonTerminalNames[nt]);
+                }
+                errorRecovery = true;
                 errorCount++;
-                continue;
+                continue; // NT is popped, keep token to try against the next stack item
             }
-            else{ /* BLANK */
-
-                printf("Discarding token at line %d\n",
-                       (ip < tokenCount ? tokens[ip]->lineNum : -1));
+            else { 
+                // BLANK STATE (PANIC MODE)
+                if (!errorRecovery) { // Only print if not muted
+                    printf("Line %d Error: Invalid token %s encountered with value %s stack top %s\n",
+                           lineNum, TerminalNames[currTok], lexStr, NonTerminalNames[nt]);
+                }
+                errorRecovery = true;
                 errorCount++;
-                ip++;
+                
+                // THE CURE FOR THE CASCADE:
+                // We advance the input pointer to skip the bad token, 
+                // BUT we DO NOT push the Non-Terminal back onto the stack!
+                // By letting it stay popped, the parser unwinds and perfectly syncs 
+                // back up with the next valid block of code (like 'else' or 'end').
+                
+                if (currTok != TK_DOLLAR) {
+                    ip++;
+                    stack[++top] = curr;
+                }
             }
         }
     }
@@ -498,4 +609,25 @@ TreeNode* parse(ParseTable* pt,
                errorCount);
 
     return root;
+}
+void printTree(TreeNode* root, int level, FILE* fp) {
+    if (root == NULL || fp == NULL) return;
+
+    for (int i = 0; i < level; i++) {
+        fprintf(fp, "  ");
+    }
+
+    if (root->symbol >= 0) {
+        if (root->tk != NULL) {
+            fprintf(fp, "-- Terminal: %s (Line %d)\n", root->tk->lexeme, root->tk->lineNum);
+        } else {
+            fprintf(fp, "-- Terminal ID: %d (Epsilon/Empty)\n", root->symbol);
+        }
+    } else {
+        fprintf(fp, "-> Non-Terminal ID: %d\n", -root->symbol - 1);
+    }
+
+    for (int i = 0; i < root->childCount; i++) {
+        printTree(root->children[i], level + 1, fp);
+    }
 }
