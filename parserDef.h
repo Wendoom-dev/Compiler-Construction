@@ -1,7 +1,7 @@
 #ifndef PARSERDEF_H
 #define PARSERDEF_H
-#include "lexer.h"
-#include "lexerDef.h"
+#include "lexer_new.h"
+#include "lexerDef_new.h"
 
 #define grammar "grammar.txt"
 
@@ -99,7 +99,7 @@ typedef struct {
 } TableCell;
 
 typedef struct {
-    TableCell table[NONTERMINAL_COUNT][TOTAL_TERMINALS_COUNT];
+    TableCell table[NONTERMINAL_COUNT][64];
 } ParseTable;
 
 
